@@ -149,8 +149,8 @@ async function handleIncomingMessage(message, webhookValue) {
     // Process the message based on type and customer stage
     await processMessage(customer, message);
 
-    // Auto-respond based on business logic
-    await handleAutoResponse(customer, message);
+    // Auto-respond based on business logic (placeholder for now)
+    // await handleAutoResponse(customer, message);
 
   } catch (error) {
     console.error('❌ Error handling incoming message:', error);
@@ -409,8 +409,8 @@ async function handleMessageStatus(status) {
   try {
     // Update message status in conversations table
     await db.query(
-      'UPDATE conversations SET whatsapp_status = $1, status_updated_at = $2 WHERE message_id = $3',
-      [statusType, timestamp, messageId]
+      'UPDATE conversations SET whatsapp_status = $1 WHERE message_id = $2',
+      [statusType, messageId]
     );
 
     // Update campaign message status if this is a campaign message
