@@ -413,13 +413,13 @@ async function handleMessageStatus(status) {
       [statusType, messageId]
     );
 
-    // Update campaign message status if this is a campaign message
-    await db.query(`
-      UPDATE campaign_messages
-      SET status = $1,
-          ${statusType}_at = $2
-      WHERE message_id = $3
-    `, [statusType, timestamp, messageId]);
+    // Update campaign message status if this is a campaign message (skip for now)
+    // await db.query(`
+    //   UPDATE campaign_messages
+    //   SET status = $1,
+    //       ${statusType}_at = $2
+    //   WHERE message_id = $3
+    // `, [statusType, timestamp, messageId]);
 
     // Emit real-time status update to frontend
     const io = global.io;
