@@ -17,7 +17,7 @@ const router = express.Router();
 const WHATSAPP_API_URL = process.env.WHATSAPP_API_URL || 'https://graph.facebook.com/v18.0';
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
 const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
-const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN;
+const VERIFY_TOKEN = process.env.WEBHOOK_VERIFY_TOKEN || process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN;
 
 /**
  * WEBHOOK VERIFICATION (GET request)
@@ -29,20 +29,25 @@ const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN;
  */
 router.get('/', (req, res) => {
   console.log('📞 Webhook verification request received');
-  
+
   // Parse query parameters
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
-  
+
   console.log('🔍 Verification details:', { mode, token, challenge });
-  
+  console.log('🔑 Expected verify token:', VERIFY_TOKEN);
+  console.log('🔑 Received verify token:', token);
+  console.log('🔍 Token match:', token === VERIFY_TOKEN);
+
   // Check if mode and token are correct
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
     console.log('✅ Webhook verified successfully!');
     res.status(200).send(challenge);
   } else {
     console.log('❌ Webhook verification failed');
+    console.log('❌ Mode check:', mode === 'subscribe');
+    console.log('❌ Token check:', token === VERIFY_TOKEN);
     res.status(403).send('Forbidden');
   }
 });
