@@ -1,6 +1,6 @@
 /**
  * Database Configuration for PropConnect
- * 
+ *
  * This file handles:
  * 1. PostgreSQL connection setup
  * 2. Database table creation
@@ -15,46 +15,55 @@ const { Pool } = require('pg');
 let pool;
 
 /**
- * Database Configuration
- * These settings come from environment variables (.env file)
- */
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'propconnect',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres123',
-  
-  // Connection pool settings
-  max: 20,          // Maximum number of connections
-  idleTimeoutMillis: 30000,  // Close idle connections after 30 seconds
-  connectionTimeoutMillis: 2000,  // Timeout after 2 seconds if can't connect
-};
-
-/**
  * Connect to PostgreSQL Database
  * Creates connection pool and tests the connection
  */
 async function connectDatabase() {
   try {
-    // Create connection pool
-    pool = new Pool(dbConfig);
-    
+    // Check if we have a DATABASE_URL (Render provides this)
+    if (process.env.DATABASE_URL) {
+      console.log('🔗 Using DATABASE_URL connection string...');
+
+      // Create connection pool with connection string
+      pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      });
+    } else {
+      // Fallback to individual parameters for local development
+      console.log('🔗 Using individual database parameters...');
+
+      const dbConfig = {
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || 5432,
+        database: process.env.DB_NAME || 'propconnect',
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres123',
+
+        // Connection pool settings
+        max: 20,          // Maximum number of connections
+        idleTimeoutMillis: 30000,  // Close idle connections after 30 seconds
+        connectionTimeoutMillis: 2000,  // Timeout after 2 seconds if can't connect
+      };
+
+      pool = new Pool(dbConfig);
+    }
+
     // Test the connection
     const client = await pool.connect();
     console.log('🔗 Testing database connection...');
-    
+
     const result = await client.query('SELECT NOW() as current_time');
     console.log('✅ Database connection successful!');
     console.log(`📅 Database time: ${result.rows[0].current_time}`);
-    
+
     client.release(); // Return connection to pool
-    
+
     // Create tables if they don't exist
     await createTables();
-    
+
     return pool;
-    
+
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
     throw error;
