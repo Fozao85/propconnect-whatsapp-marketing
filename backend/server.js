@@ -92,6 +92,45 @@ app.get('/health', (req, res) => {
   });
 });
 
+/**
+ * API Test Endpoint
+ * Test database connectivity and basic API functionality
+ */
+app.get('/api/test', async (req, res) => {
+  try {
+    const { getDB } = require('./config/database');
+    const db = getDB();
+
+    // Test database connection
+    const result = await db.query('SELECT NOW() as current_time');
+
+    // Test table existence
+    const tables = await db.query(`
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
+      ORDER BY table_name
+    `);
+
+    res.json({
+      status: 'OK',
+      message: 'API and database working',
+      database_time: result.rows[0].current_time,
+      tables: tables.rows.map(row => row.table_name),
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ API test error:', error);
+    res.status(500).json({
+      status: 'ERROR',
+      message: 'API test failed',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Performance analytics endpoint
 app.get('/api/analytics/performance', (req, res) => {
   const analytics = getPerformanceAnalytics();

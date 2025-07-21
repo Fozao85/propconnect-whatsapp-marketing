@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { 
-  Plus, 
-  Send, 
-  Users, 
-  MessageSquare, 
-  TrendingUp, 
+import {
+  Plus,
+  Send,
+  Users,
+  MessageSquare,
+  TrendingUp,
   Calendar,
   Target,
   BarChart3,
@@ -14,7 +14,9 @@ import {
   XCircle,
   Play
 } from 'lucide-react'
+import axios from 'axios'
 import toast from 'react-hot-toast'
+import LoadingSpinner from '../components/UI/LoadingSpinner'
 import CampaignBuilder from '../components/Campaigns/CampaignBuilder'
 
 const Campaigns = () => {
@@ -29,9 +31,8 @@ const Campaigns = () => {
 
   const fetchCampaigns = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/campaigns')
-      const data = await response.json()
-      setCampaigns(data)
+      const response = await axios.get('/api/campaigns')
+      setCampaigns(response.data.campaigns || [])
     } catch (error) {
       console.error('Error fetching campaigns:', error)
       toast.error('Failed to load campaigns')
@@ -42,16 +43,9 @@ const Campaigns = () => {
 
   const launchCampaign = async (campaignId) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/campaigns/${campaignId}/launch`, {
-        method: 'POST'
-      })
-      
-      if (response.ok) {
-        toast.success('Campaign launched successfully!')
-        fetchCampaigns()
-      } else {
-        toast.error('Failed to launch campaign')
-      }
+      await axios.post(`/api/campaigns/${campaignId}/launch`)
+      toast.success('Campaign launched successfully!')
+      fetchCampaigns() // Refresh campaigns
     } catch (error) {
       console.error('Error launching campaign:', error)
       toast.error('Failed to launch campaign')
@@ -82,6 +76,15 @@ const Campaigns = () => {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  // Show loading spinner while fetching data
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
       </div>
     )
   }
