@@ -129,7 +129,7 @@ async function handleIncomingMessage(message, webhookValue) {
     });
 
     // Emit real-time update to frontend
-    const io = global.io || req.app?.get('io');
+    const io = global.io;
     if (io) {
       io.emit('new-message', {
         conversationId: customer.id,
@@ -422,7 +422,7 @@ async function handleMessageStatus(status) {
     `, [statusType, timestamp, messageId]);
 
     // Emit real-time status update to frontend
-    const io = global.io || req.app?.get('io');
+    const io = global.io;
     if (io) {
       io.emit('message-status-update', {
         messageId,
