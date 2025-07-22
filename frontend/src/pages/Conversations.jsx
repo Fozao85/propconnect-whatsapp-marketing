@@ -36,6 +36,20 @@ const Conversations = () => {
   // Real-time socket connection
   const socket = useSocket(1) // Demo user ID
 
+  // Fetch conversations and messages
+  const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError } = useConversations()
+  const { data: messagesData, isLoading: messagesLoading } = useConversationMessages(selectedConversation)
+  const { mutate: sendMessage, isPending: sendingMessage } = useSendMessage()
+  const { mutate: markAsRead } = useMarkAsRead()
+
+  // Debug logging
+  console.log('🔍 Conversations Debug:', {
+    conversations,
+    conversationsLoading,
+    conversationsError,
+    conversationsCount: conversations.length
+  })
+
   // Real-time message handling
   useEffect(() => {
     if (socket.socket) {
@@ -98,20 +112,6 @@ const Conversations = () => {
       }
     }
   }, [socket.socket, selectedConversation, conversations])
-
-  // Fetch conversations and messages
-  const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError } = useConversations()
-  const { data: messagesData, isLoading: messagesLoading } = useConversationMessages(selectedConversation)
-  const { mutate: sendMessage, isPending: sendingMessage } = useSendMessage()
-  const { mutate: markAsRead } = useMarkAsRead()
-
-  // Debug logging
-  console.log('🔍 Conversations Debug:', {
-    conversations,
-    conversationsLoading,
-    conversationsError,
-    conversationsCount: conversations.length
-  })
 
   // Auto-select first conversation
   useEffect(() => {
