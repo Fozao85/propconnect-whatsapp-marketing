@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PropConnect API Debug</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' http://localhost:3000 https://propconnect-backend.onrender.com; connect-src 'self' http://localhost:3000 https://propconnect-backend.onrender.com;"
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
@@ -131,6 +132,7 @@
         async function testCreateContact() {
             showLoading('contacts-result');
             try {
+                const API_BASE = getApiBase();
                 const testContact = {
                     phone: '+237' + Math.floor(Math.random() * 1000000000),
                     name: 'Test Contact ' + Date.now(),
@@ -138,7 +140,7 @@
                     stage: 'new',
                     source: 'manual'
                 };
-                
+
                 const response = await fetch(`${API_BASE}/api/contacts`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -154,6 +156,7 @@
         async function testPropertiesAPI() {
             showLoading('properties-result');
             try {
+                const API_BASE = getApiBase();
                 const response = await fetch(`${API_BASE}/api/properties`);
                 const data = await response.json();
                 showResult('properties-result', response.ok, data);
@@ -165,6 +168,7 @@
         async function testCreateProperty() {
             showLoading('properties-result');
             try {
+                const API_BASE = getApiBase();
                 const testProperty = {
                     title: 'Test Property ' + Date.now(),
                     description: 'A beautiful test property',
@@ -179,7 +183,7 @@
                     area_sqm: 120,
                     status: 'available'
                 };
-                
+
                 const response = await fetch(`${API_BASE}/api/properties`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -195,6 +199,7 @@
         async function testConversationsAPI() {
             showLoading('conversations-result');
             try {
+                const API_BASE = getApiBase();
                 const response = await fetch(`${API_BASE}/api/conversations`);
                 const data = await response.json();
                 showResult('conversations-result', response.ok, data);
@@ -206,6 +211,7 @@
         async function testCampaignsAPI() {
             showLoading('campaigns-result');
             try {
+                const API_BASE = getApiBase();
                 const response = await fetch(`${API_BASE}/api/campaigns`);
                 const data = await response.json();
                 showResult('campaigns-result', response.ok, data);

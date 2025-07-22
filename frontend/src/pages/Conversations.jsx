@@ -22,6 +22,7 @@ import useSocket from '../hooks/useSocket'
 import { useConversations, useConversationMessages, useSendMessage, useMarkAsRead } from '../hooks/useConversations'
 import LoadingSpinner from '../components/UI/LoadingSpinner'
 import PropertySelectorModal from '../components/Modals/PropertySelectorModal'
+import ConversationsDebug from '../components/Debug/ConversationsDebug'
 
 const Conversations = () => {
   const [selectedConversation, setSelectedConversation] = useState(null)
@@ -99,10 +100,18 @@ const Conversations = () => {
   }, [socket.socket, selectedConversation, conversations])
 
   // Fetch conversations and messages
-  const { data: conversations = [], isLoading: conversationsLoading } = useConversations()
+  const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError } = useConversations()
   const { data: messagesData, isLoading: messagesLoading } = useConversationMessages(selectedConversation)
   const { mutate: sendMessage, isPending: sendingMessage } = useSendMessage()
   const { mutate: markAsRead } = useMarkAsRead()
+
+  // Debug logging
+  console.log('🔍 Conversations Debug:', {
+    conversations,
+    conversationsLoading,
+    conversationsError,
+    conversationsCount: conversations.length
+  })
 
   // Auto-select first conversation
   useEffect(() => {
@@ -211,8 +220,39 @@ const Conversations = () => {
     )
   }
 
+  if (conversationsError) {
+    return (
+      <div className="space-y-6">
+        <div className="border-b border-gray-200 pb-4">
+          <h1 className="text-2xl font-bold text-gray-900">Conversations</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            WhatsApp conversations with your leads and customers
+          </p>
+        </div>
+        <div className="text-center py-12">
+          <div className="text-red-500 mb-4">
+            <MessageSquare className="w-12 h-12 mx-auto mb-2" />
+            <h3 className="text-lg font-medium">Failed to load conversations</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Error: {conversationsError.message}
+            </p>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="btn btn-primary"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
+      {/* Debug Component - Remove this after testing */}
+      <ConversationsDebug />
+
       {/* Page header */}
       <div className="border-b border-gray-200 pb-4">
         <h1 className="text-2xl font-bold text-gray-900">Conversations</h1>
