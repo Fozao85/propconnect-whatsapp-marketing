@@ -36,8 +36,8 @@ const Conversations = () => {
   // Real-time socket connection
   const socket = useSocket(1) // Demo user ID
 
-  // Fetch conversations and messages
-  const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError } = useConversations()
+  // Fetch conversations and messages (with cache busting)
+  const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError, refetch: refetchConversations } = useConversations()
   const { data: messagesData, isLoading: messagesLoading } = useConversationMessages(selectedConversation)
   const { mutate: sendMessage, isPending: sendingMessage } = useSendMessage()
   const { mutate: markAsRead } = useMarkAsRead()

@@ -62,7 +62,38 @@ router.get('/', async (req, res) => {
     conversationList.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     
     console.log(`📱 Retrieved ${conversationList.length} conversations`);
-    
+    console.log('🔍 Raw conversation data:', conversations.rows);
+    console.log('🔍 Processed conversation list:', conversationList);
+
+    // If no conversations found, let's check if we have contacts without conversations
+    if (conversationList.length === 0) {
+      const contactsOnly = await db.query('SELECT id, name, phone, stage FROM contacts ORDER BY created_at DESC');
+      console.log('👥 Found contacts without conversations:', contactsOnly.rows);
+
+      // Return contacts as conversations with no messages for debugging
+      const fallbackConversations = contactsOnly.rows.map(contact => ({
+        id: contact.id,
+        contact: {
+          id: contact.id,
+          name: contact.name,
+          phone: contact.phone,
+          stage: contact.stage,
+          status: 'online'
+        },
+        lastMessage: 'No messages yet',
+        lastMessageDirection: null,
+        timestamp: new Date().toISOString(),
+        unread: 0,
+        whatsappStatus: null
+      }));
+
+      return res.json({
+        conversations: fallbackConversations,
+        total: fallbackConversations.length,
+        debug: 'Showing contacts as conversations - no conversation records found'
+      });
+    }
+
     res.json({
       conversations: conversationList,
       total: conversationList.length
