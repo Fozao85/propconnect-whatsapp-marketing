@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PropConnect API Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .loading { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .endpoint { font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+    <h1>🔧 PropConnect API Debug Tool</h1>
+    <p>This tool helps debug API connectivity issues between frontend and backend.</p>
+
+    <div class="test-section">
+        <h3>🌐 Backend Configuration</h3>
+        <p><strong>Production API:</strong> <span class="endpoint">https://propconnect-backend.onrender.com</span></p>
+        <p><strong>Local API:</strong> <span class="endpoint">http://localhost:3000</span></p>
+        <div>
+            <label>
+                <input type="radio" name="backend" value="production" checked> Use Production Backend
+            </label>
+            <label style="margin-left: 15px;">
+                <input type="radio" name="backend" value="local"> Use Local Backend
+            </label>
+        </div>
+        <button onclick="testBackendHealth()">Test Backend Health</button>
+        <div id="health-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🗄️ Database & Tables</h3>
+        <button onclick="testDatabaseTables()">Test Database Connection</button>
+        <div id="database-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>👥 Contacts API</h3>
+        <button onclick="testContactsAPI()">Test GET /api/contacts</button>
+        <button onclick="testCreateContact()">Test POST /api/contacts</button>
+        <div id="contacts-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🏠 Properties API</h3>
+        <button onclick="testPropertiesAPI()">Test GET /api/properties</button>
+        <button onclick="testCreateProperty()">Test POST /api/properties</button>
+        <div id="properties-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>💬 Conversations API</h3>
+        <button onclick="testConversationsAPI()">Test GET /api/conversations</button>
+        <div id="conversations-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📢 Campaigns API</h3>
+        <button onclick="testCampaignsAPI()">Test GET /api/campaigns</button>
+        <div id="campaigns-result"></div>
+    </div>
+
+    <script>
+        function getApiBase() {
+            const selectedBackend = document.querySelector('input[name="backend"]:checked').value;
+            return selectedBackend === 'local'
+                ? 'http://localhost:3000'
+                : 'https://propconnect-backend.onrender.com';
+        }
+        
+        function showLoading(elementId) {
+            document.getElementById(elementId).innerHTML = '<div class="loading">⏳ Testing...</div>';
+        }
+        
+        function showResult(elementId, success, data) {
+            const element = document.getElementById(elementId);
+            const className = success ? 'success' : 'error';
+            const icon = success ? '✅' : '❌';
+            element.innerHTML = `
+                <div class="${className}">
+                    <strong>${icon} ${success ? 'Success' : 'Error'}</strong>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        async function testBackendHealth() {
+            showLoading('health-result');
+            try {
+                const API_BASE = getApiBase();
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                showResult('health-result', response.ok, data);
+            } catch (error) {
+                showResult('health-result', false, { error: error.message });
+            }
+        }
+
+        async function testDatabaseTables() {
+            showLoading('database-result');
+            try {
+                const API_BASE = getApiBase();
+                const response = await fetch(`${API_BASE}/api/test`);
+                const data = await response.json();
+                showResult('database-result', response.ok, data);
+            } catch (error) {
+                showResult('database-result', false, { error: error.message });
+            }
+        }
+
+        async function testContactsAPI() {
+            showLoading('contacts-result');
+            try {
+                const API_BASE = getApiBase();
+                const response = await fetch(`${API_BASE}/api/contacts`);
+                const data = await response.json();
+                showResult('contacts-result', response.ok, data);
+            } catch (error) {
+                showResult('contacts-result', false, { error: error.message });
+            }
+        }
+
+        async function testCreateContact() {
+            showLoading('contacts-result');
+            try {
+                const testContact = {
+                    phone: '+237' + Math.floor(Math.random() * 1000000000),
+                    name: 'Test Contact ' + Date.now(),
+                    email: 'test@example.com',
+                    stage: 'new',
+                    source: 'manual'
+                };
+                
+                const response = await fetch(`${API_BASE}/api/contacts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testContact)
+                });
+                const data = await response.json();
+                showResult('contacts-result', response.ok, data);
+            } catch (error) {
+                showResult('contacts-result', false, { error: error.message });
+            }
+        }
+
+        async function testPropertiesAPI() {
+            showLoading('properties-result');
+            try {
+                const response = await fetch(`${API_BASE}/api/properties`);
+                const data = await response.json();
+                showResult('properties-result', response.ok, data);
+            } catch (error) {
+                showResult('properties-result', false, { error: error.message });
+            }
+        }
+
+        async function testCreateProperty() {
+            showLoading('properties-result');
+            try {
+                const testProperty = {
+                    title: 'Test Property ' + Date.now(),
+                    description: 'A beautiful test property',
+                    property_type: 'apartment',
+                    transaction_type: 'sale',
+                    price: 50000000,
+                    currency: 'XAF',
+                    city: 'Douala',
+                    region: 'Littoral',
+                    bedrooms: 3,
+                    bathrooms: 2,
+                    area_sqm: 120,
+                    status: 'available'
+                };
+                
+                const response = await fetch(`${API_BASE}/api/properties`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testProperty)
+                });
+                const data = await response.json();
+                showResult('properties-result', response.ok, data);
+            } catch (error) {
+                showResult('properties-result', false, { error: error.message });
+            }
+        }
+
+        async function testConversationsAPI() {
+            showLoading('conversations-result');
+            try {
+                const response = await fetch(`${API_BASE}/api/conversations`);
+                const data = await response.json();
+                showResult('conversations-result', response.ok, data);
+            } catch (error) {
+                showResult('conversations-result', false, { error: error.message });
+            }
+        }
+
+        async function testCampaignsAPI() {
+            showLoading('campaigns-result');
+            try {
+                const response = await fetch(`${API_BASE}/api/campaigns`);
+                const data = await response.json();
+                showResult('campaigns-result', response.ok, data);
+            } catch (error) {
+                showResult('campaigns-result', false, { error: error.message });
+            }
+        }
+
+        // Auto-test backend health on page load
+        window.onload = function() {
+            testBackendHealth();
+        };
+    </script>
+</body>
+</html>

@@ -51,8 +51,15 @@ const PORT = process.env.PORT || 3000;
  */
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
+  origin: [
+    'http://localhost:5173',           // Local development
+    'http://localhost:3000',           // Local development (alternative)
+    'https://propconnect-frontend.onrender.com', // Production frontend (when deployed)
+    process.env.FRONTEND_URL           // Environment-specific URL
+  ].filter(Boolean), // Remove any undefined values
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 /**
