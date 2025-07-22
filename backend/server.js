@@ -119,11 +119,15 @@ app.get('/api/test', async (req, res) => {
       ORDER BY table_name
     `);
 
+    // Get all contacts to debug
+    const contacts = await db.query('SELECT id, name, phone, stage, created_at FROM contacts ORDER BY created_at DESC');
+
     res.json({
       status: 'OK',
       message: 'API and database working',
       database_time: result.rows[0].current_time,
       tables: tables.rows.map(row => row.table_name),
+      contacts: contacts.rows,
       timestamp: new Date().toISOString()
     });
 
