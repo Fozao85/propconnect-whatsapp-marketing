@@ -247,7 +247,31 @@ async function createTables() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    
+
+    // Customer notes table - for tracking customer interactions and notes
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS customer_notes (
+        id SERIAL PRIMARY KEY,
+        contact_id INTEGER REFERENCES contacts(id) ON DELETE CASCADE,
+        note TEXT NOT NULL,
+        type VARCHAR(50) DEFAULT 'note',
+        created_by INTEGER DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Customer activities table - for comprehensive activity tracking
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS customer_activities (
+        id SERIAL PRIMARY KEY,
+        contact_id INTEGER REFERENCES contacts(id) ON DELETE CASCADE,
+        activity_type VARCHAR(50) NOT NULL,
+        description TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     console.log('✅ All database tables created successfully!');
     
   } catch (error) {

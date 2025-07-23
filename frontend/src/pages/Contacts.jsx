@@ -16,12 +16,16 @@ import {
 import { useContacts, useDeleteContact, useSendMessage } from '../hooks/useContacts'
 import AddContactModal from '../components/Modals/AddContactModal'
 import LoadingSpinner from '../components/UI/LoadingSpinner'
+import CustomerProfile from '../components/Customer/CustomerProfile'
+import { useUpdateCustomer } from '../hooks/useCustomer'
 
 const Contacts = () => {
   const [searchParams] = useSearchParams()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedCustomer, setSelectedCustomer] = useState(null)
+  const [showCustomerProfile, setShowCustomerProfile] = useState(false)
 
   // Handle URL search parameters
   useEffect(() => {
@@ -39,6 +43,7 @@ const Contacts = () => {
 
   const { mutate: deleteContact } = useDeleteContact()
   const { mutate: sendMessage, isPending: isSendingMessage } = useSendMessage()
+  const { mutate: updateCustomer } = useUpdateCustomer()
 
   const stageColors = {
     new: 'bg-blue-100 text-blue-800',
@@ -62,6 +67,20 @@ const Contacts = () => {
       message,
       messageType: 'text'
     })
+  }
+
+  const handleViewCustomer = (contact) => {
+    setSelectedCustomer(contact)
+    setShowCustomerProfile(true)
+  }
+
+  const handleCloseCustomerProfile = () => {
+    setShowCustomerProfile(false)
+    setSelectedCustomer(null)
+  }
+
+  const handleUpdateCustomer = (updatedCustomer) => {
+    updateCustomer(updatedCustomer)
   }
 
   const formatBudget = (min, max) => {
@@ -150,7 +169,11 @@ const Contacts = () => {
       {/* Contacts grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {contacts.map((contact) => (
-          <div key={contact.id} className="card">
+          <div
+            key={contact.id}
+            className="card cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => handleViewCustomer(contact)}
+          >
             <div className="card-content">
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3">
@@ -206,7 +229,10 @@ const Contacts = () => {
               
               <div className="mt-4 flex space-x-2">
                 <button
-                  onClick={() => handleSendWhatsApp(contact)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleSendWhatsApp(contact)
+                  }}
                   disabled={isSendingMessage}
                   className="btn btn-outline btn-sm flex items-center space-x-1"
                 >
@@ -217,11 +243,17 @@ const Contacts = () => {
                   )}
                   <span>WhatsApp</span>
                 </button>
-                <button className="btn btn-ghost btn-sm">
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  className="btn btn-ghost btn-sm"
+                >
                   <Edit className="w-3 h-3" />
                 </button>
                 <button
-                  onClick={() => handleDeleteContact(contact.id, contact.name)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteContact(contact.id, contact.name)
+                  }}
                   className="btn btn-ghost btn-sm text-red-600 hover:text-red-700"
                 >
                   <Trash2 className="w-3 h-3" />
@@ -262,6 +294,15 @@ const Contacts = () => {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
       />
+
+      {/* Customer Profile Modal */}
+      {showCustomerProfile && selectedCustomer && (
+        <CustomerProfile
+          customer={selectedCustomer}
+          onClose={handleCloseCustomerProfile}
+          onUpdate={handleUpdateCustomer}
+        />
+      )}
     </div>
   )
 }

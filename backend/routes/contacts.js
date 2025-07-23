@@ -423,4 +423,145 @@ router.get('/stats/overview', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/contacts/:id/activity
+ * Get customer activity timeline
+ */
+router.get('/:id/activity', async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+
+    // Get customer activities from multiple sources
+    const activities = await db.query(`
+      SELECT
+        'message' as type,
+        'Sent message: ' || SUBSTRING(content, 1, 50) || CASE WHEN LENGTH(content) > 50 THEN '...' ELSE '' END as description,
+        created_at as timestamp,
+        direction
+      FROM messages
+      WHERE contact_id = $1
+
+      UNION ALL
+
+      SELECT
+        'stage_change' as type,
+        'Stage changed to ' || stage as description,
+        updated_at as timestamp,
+        'system' as direction
+      FROM contacts
+      WHERE id = $1
+
+      UNION ALL
+
+      SELECT
+        'contact_created' as type,
+        'Contact created' as description,
+        created_at as timestamp,
+        'system' as direction
+      FROM contacts
+      WHERE id = $1
+
+      ORDER BY timestamp DESC
+      LIMIT 50
+    `, [id]);
+
+    res.json({
+      success: true,
+      activities: activities.rows
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching customer activity:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch customer activity',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/contacts/:id/stats
+ * Get customer statistics
+ */
+router.get('/:id/stats', async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+
+    // Get various customer statistics
+    const stats = await db.query(`
+      SELECT
+        (SELECT COUNT(*) FROM messages WHERE contact_id = $1) as total_messages,
+        (SELECT COUNT(*) FROM messages WHERE contact_id = $1 AND direction = 'inbound') as inbound_messages,
+        (SELECT COUNT(*) FROM messages WHERE contact_id = $1 AND direction = 'outbound') as outbound_messages,
+        (SELECT COUNT(*) FROM property_matches WHERE contact_id = $1) as properties_viewed,
+        (SELECT COUNT(*) FROM property_matches WHERE contact_id = $1 AND is_favorite = true) as favorite_properties,
+        (SELECT EXTRACT(DAY FROM NOW() - created_at) FROM contacts WHERE id = $1) as days_since_created
+    `, [id]);
+
+    const statsData = stats.rows[0] || {};
+
+    res.json({
+      success: true,
+      stats: {
+        messages: parseInt(statsData.total_messages) || 0,
+        inbound_messages: parseInt(statsData.inbound_messages) || 0,
+        outbound_messages: parseInt(statsData.outbound_messages) || 0,
+        properties_viewed: parseInt(statsData.properties_viewed) || 0,
+        favorite_properties: parseInt(statsData.favorite_properties) || 0,
+        days_active: parseInt(statsData.days_since_created) || 0
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching customer stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch customer statistics',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/contacts/:id/notes
+ * Add note to customer
+ */
+router.post('/:id/notes', async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    const { note, type = 'note' } = req.body;
+
+    if (!note) {
+      return res.status(400).json({
+        success: false,
+        message: 'Note content is required'
+      });
+    }
+
+    const result = await db.query(`
+      INSERT INTO customer_notes (contact_id, note, type, created_at)
+      VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+      RETURNING *
+    `, [id, note, type]);
+
+    res.status(201).json({
+      success: true,
+      note: result.rows[0],
+      message: 'Note added successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Error adding customer note:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add note',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
