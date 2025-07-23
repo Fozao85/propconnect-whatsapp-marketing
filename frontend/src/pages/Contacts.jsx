@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import {
   Users,
   Search,
@@ -19,16 +19,13 @@ import {
 import { useContacts, useDeleteContact, useSendMessage } from '../hooks/useContacts'
 import AddContactModal from '../components/Modals/AddContactModal'
 import LoadingSpinner from '../components/UI/LoadingSpinner'
-import CustomerProfile from '../components/Customer/CustomerProfile'
-import { useUpdateCustomer } from '../hooks/useCustomer'
 
 const Contacts = () => {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [showAddModal, setShowAddModal] = useState(false)
-  const [selectedCustomer, setSelectedCustomer] = useState(null)
-  const [showCustomerProfile, setShowCustomerProfile] = useState(false)
 
   // Handle URL search parameters
   useEffect(() => {
@@ -46,7 +43,6 @@ const Contacts = () => {
 
   const { mutate: deleteContact } = useDeleteContact()
   const { mutate: sendMessage, isPending: isSendingMessage } = useSendMessage()
-  const { mutate: updateCustomer } = useUpdateCustomer()
 
   const stageColors = {
     new: 'bg-blue-100 text-blue-800',
@@ -73,17 +69,7 @@ const Contacts = () => {
   }
 
   const handleViewCustomer = (contact) => {
-    setSelectedCustomer(contact)
-    setShowCustomerProfile(true)
-  }
-
-  const handleCloseCustomerProfile = () => {
-    setShowCustomerProfile(false)
-    setSelectedCustomer(null)
-  }
-
-  const handleUpdateCustomer = (updatedCustomer) => {
-    updateCustomer(updatedCustomer)
+    navigate(`/customer/${contact.id}`)
   }
 
   const formatBudget = (min, max) => {
@@ -308,15 +294,6 @@ const Contacts = () => {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
       />
-
-      {/* Customer Profile Modal */}
-      {showCustomerProfile && selectedCustomer && (
-        <CustomerProfile
-          customer={selectedCustomer}
-          onClose={handleCloseCustomerProfile}
-          onUpdate={handleUpdateCustomer}
-        />
-      )}
     </div>
   )
 }
