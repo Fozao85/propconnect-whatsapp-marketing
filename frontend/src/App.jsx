@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage'
 import Dashboard from './pages/Dashboard'
 import Contacts from './pages/Contacts'
 import CustomerProfile from './pages/CustomerProfile'
+import Pipeline from './pages/Pipeline'
 import Properties from './pages/Properties'
 import Conversations from './pages/Conversations'
 import Campaigns from './pages/Campaigns'
@@ -45,6 +46,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/customer/:id" element={<CustomerProfile />} />
+        <Route path="/pipeline" element={<Pipeline />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/conversations" element={<Conversations />} />
         <Route path="/campaigns" element={<Campaigns />} />

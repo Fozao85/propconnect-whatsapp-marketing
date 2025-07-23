@@ -9,13 +9,15 @@ import {
   Settings,
   X,
   Smartphone,
-  Target
+  Target,
+  GitBranch
 } from 'lucide-react'
 import clsx from 'clsx'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Contacts', href: '/contacts', icon: Users },
+  { name: 'Pipeline', href: '/pipeline', icon: GitBranch },
   { name: 'Properties', href: '/properties', icon: Home },
   { name: 'Conversations', href: '/conversations', icon: MessageSquare },
   { name: 'Campaigns', href: '/campaigns', icon: Target },

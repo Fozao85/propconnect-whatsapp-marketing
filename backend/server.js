@@ -26,6 +26,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const conversationRoutes = require('./routes/conversations');
 const campaignRoutes = require('./routes/campaigns');
 const campaignTemplateRoutes = require('./routes/campaign-templates');
+const pipelineRoutes = require('./routes/pipeline');
 const { connectDatabase } = require('./config/database');
 const { performanceMonitor, getPerformanceAnalytics } = require('./middleware/performance');
 
@@ -161,6 +162,7 @@ app.use('/api/dashboard', dashboardRoutes);  // Dashboard analytics
 app.use('/api/conversations', conversationRoutes); // Conversation management
 app.use('/api/campaigns', campaignRoutes);       // Campaign management
 app.use('/api/campaign-templates', campaignTemplateRoutes); // Campaign templates
+app.use('/api/pipeline', pipelineRoutes);        // Pipeline management
 
 // =============================================================================
 // SOCKET.IO REAL-TIME FEATURES
