@@ -11,7 +11,10 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  Loader2
+  Loader2,
+  Home,
+  DollarSign,
+  Clock
 } from 'lucide-react'
 import { useContacts, useDeleteContact, useSendMessage } from '../hooks/useContacts'
 import AddContactModal from '../components/Modals/AddContactModal'
@@ -167,97 +170,108 @@ const Contacts = () => {
       </div>
 
       {/* Contacts grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {contacts.map((contact) => (
           <div
             key={contact.id}
-            className="card cursor-pointer hover:shadow-lg transition-shadow"
+            className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:border-blue-300"
             onClick={() => handleViewCustomer(contact)}
           >
-            <div className="card-content">
-              <div className="flex items-start justify-between">
+            <div className="p-6">
+              {/* Header with avatar and actions */}
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-600">
-                    <span className="text-sm font-medium text-white">
-                      {contact.name.split(' ').map(n => n[0]).join('')}
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 shadow-sm">
+                    <span className="text-sm font-semibold text-white">
+                      {contact.name?.split(' ').map(n => n[0]).join('') || 'N/A'}
                     </span>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900">{contact.name}</h3>
-                    <p className="text-xs text-gray-500">{contact.email}</p>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base font-semibold text-gray-900 truncate">{contact.name || 'Unknown'}</h3>
+                    <p className="text-sm text-gray-500 truncate">{contact.email || 'No email'}</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-1">
-                  <span className={`badge ${stageColors[contact.stage] || 'bg-gray-100 text-gray-800'}`}>
+
+                <div className="flex items-center space-x-2 flex-shrink-0">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${stageColors[contact.stage] || 'bg-gray-100 text-gray-800'}`}>
                     {contact.stage || 'new'}
                   </span>
-                  <button className="p-1 text-gray-400 hover:text-gray-600">
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+                  >
                     <MoreVertical className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-              
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Phone className="w-4 h-4" />
-                  <span>{contact.phone}</span>
-                </div>
 
-                {contact.email && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Mail className="w-4 h-4" />
-                    <span>{contact.email}</span>
-                  </div>
-                )}
+              {/* Contact Information */}
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="truncate">{contact.phone}</span>
+                </div>
 
                 {contact.property_type && (
-                  <div className="text-sm text-gray-600">
-                    <strong>Interest:</strong> {contact.property_type}
-                    {contact.preferred_location && ` in ${contact.preferred_location}`}
+                  <div className="flex items-start space-x-2 text-sm text-gray-600">
+                    <Home className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-medium text-gray-700">{contact.property_type}</span>
+                      {contact.preferred_location && (
+                        <span className="text-gray-500"> in {contact.preferred_location}</span>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                <div className="text-sm text-gray-600">
-                  <strong>Budget:</strong> {formatBudget(contact.budget_min, contact.budget_max)}
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <DollarSign className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="truncate">{formatBudget(contact.budget_min, contact.budget_max)}</span>
                 </div>
 
-                <div className="text-xs text-gray-500">
-                  Last contact: {formatDate(contact.last_contact_at)}
+                <div className="flex items-center space-x-2 text-xs text-gray-500">
+                  <Clock className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                  <span>Last contact: {formatDate(contact.last_contact_at)}</span>
                 </div>
               </div>
-              
-              <div className="mt-4 flex space-x-2">
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
                     handleSendWhatsApp(contact)
                   }}
                   disabled={isSendingMessage}
-                  className="btn btn-outline btn-sm flex items-center space-x-1"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-green-700 bg-green-50 rounded-md hover:bg-green-100 transition-colors disabled:opacity-50"
                 >
                   {isSendingMessage ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <MessageSquare className="w-3 h-3" />
+                    <MessageSquare className="w-4 h-4" />
                   )}
                   <span>WhatsApp</span>
                 </button>
-                <button
-                  onClick={(e) => e.stopPropagation()}
-                  className="btn btn-ghost btn-sm"
-                >
-                  <Edit className="w-3 h-3" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDeleteContact(contact.id, contact.name)
-                  }}
-                  className="btn btn-ghost btn-sm text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
+
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    title="Edit contact"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteContact(contact.id, contact.name)
+                    }}
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    title="Delete contact"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

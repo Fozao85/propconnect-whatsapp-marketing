@@ -70,26 +70,27 @@ const CustomerProfile = ({ customer, onClose, onUpdate }) => {
   ]
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <span className="text-2xl font-bold">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] overflow-hidden">
+        {/* Mobile-friendly container */}
+        {/* Header - Mobile Responsive */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-lg sm:text-2xl font-bold">
                   {customer.name?.split(' ').map(n => n[0]).join('') || 'N/A'}
                 </span>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold">{customer.name || 'Unknown Customer'}</h2>
-                <p className="text-blue-100">{customer.phone}</p>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStageColor(customer.stage)}`}>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl sm:text-2xl font-bold truncate">{customer.name || 'Unknown Customer'}</h2>
+                <p className="text-blue-100 text-sm sm:text-base">{customer.phone}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mt-1">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium w-fit ${getStageColor(customer.stage)}`}>
                     {customer.stage?.charAt(0).toUpperCase() + customer.stage?.slice(1)}
                   </span>
-                  <span className="text-blue-100 text-sm">
-                    • Last contact: {new Date(customer.last_contact_at || customer.updated_at).toLocaleDateString()}
+                  <span className="text-blue-100 text-xs sm:text-sm">
+                    Last contact: {new Date(customer.last_contact_at || customer.updated_at).toLocaleDateString()}
                   </span>
                 </div>
               </div>
@@ -142,33 +143,34 @@ const CustomerProfile = ({ customer, onClose, onUpdate }) => {
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Mobile Responsive */}
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
+          <nav className="flex overflow-x-auto px-4 sm:px-6">
             {tabs.map((tab) => {
               const Icon = tab.icon
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-4 border-b-2 font-medium text-sm transition-colors ${
+                  className={`flex items-center space-x-1 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span>{tab.label}</span>
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.label.slice(0, 3)}</span>
                 </button>
               )
             })}
           </nav>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        {/* Content - Mobile Responsive */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Contact Information */}
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-lg p-4">
